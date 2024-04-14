@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+</head>
+<body>
+
+<h1>Погода по координатам</h1>
+
+<p>Для получения погоды введите широту (latitude) и долготу (longitude) пользователя.</p>
+
+<label >Широта (Latitude):</label>
+<input type="text" id="latitudeInput">
+
+<label >Долгота (Longitude):</label>
+<input type="text" id="longitudeInput">
+
+<button onclick="getWeather()">Получить погоду</button>
+
+<div id="weatherInfo">
+    <!-- Здесь будет выводиться информация о погоде -->
+</div>
+
+<script>
+    function getWeather() {
+        // Получаем значения широты и долготы из полей ввода
+        const latitude = document.getElementById('latitudeInput').value;
+        const longitude = document.getElementById('longitudeInput').value;
+
+        // Формируем URL для отправки запроса на сервер
+        const url = `/openWeather?latitude=${latitude}&longitude=${longitude}`;
+
+        // Отправляем GET запрос с помощью Fetch API
+        fetch(url)
+            .then(response => {
+                // Проверяем успешность ответа
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+                // Преобразуем ответ в JSON
+                return response.json();
+            })
+            .then(data => {
+                // Обработка данных о погоде
+                const weatherInfo = `
+                    <p>Страна: ${data.country}</p>
+                    <p>Город: ${data.name}</p>
+                    <p>Температура: ${data.temp} Фаренгейт</p>
+                    <p>Погодные условия: ${data.main}</p>
+                    <p>Описание: ${data.description}</p>
+                    <p>Давление: ${data.pressure} мм рт. ст.</p>
+                    <p>Ветер: ${data.speed} м/с</p>
+                `;
+                // Выводим информацию о погоде на страницу
+                document.getElementById('weatherInfo').innerHTML = weatherInfo;
+            })
+            .catch(error => {
+                // Обработка ошибок при выполнении запроса
+                console.error('Ошибка при получении данных о погоде:', error);
+                document.getElementById('weatherInfo').innerHTML = '<p>Произошла ошибка при получении данных о погоде.</p>';
+            });
+    }
+</script>
+
+</body>
+</html>
