@@ -22,8 +22,9 @@ func main() {
 		port = "8080"
 	}
 
-	router.Static("/static", "./static")
-	router.LoadHTMLGlob("templates/*")
+	router.Static("/pages", "./web/pages")
+	router.Static("/js", "./web/js")
+	router.LoadHTMLGlob("web/pages/*")
 
 	routes.SetupRoutes(router)
 
