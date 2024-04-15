@@ -1,0 +1,69 @@
+definitions:
+  models.WeatherModel:
+    properties:
+      country:
+        type: string
+      description:
+        type: string
+      main:
+        type: string
+      name:
+        type: string
+      pressure:
+        type: number
+      speed:
+        type: number
+      temp:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: Simple server for work with weather data.
+  title: WeatherCaravan
+  version: "1.0"
+paths:
+  /accuWeather:
+    get:
+      description: Получить информацию по координатам
+      parameters:
+      - description: Широта
+        in: query
+        name: latitude
+        required: true
+        type: string
+      - description: Долгота
+        in: query
+        name: longitude
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WeatherModel'
+      summary: Получить информацию о погоде из AccuWeather
+  /openWeather:
+    get:
+      description: Получить информацию по координатам
+      parameters:
+      - description: Широта
+        in: query
+        name: latitude
+        required: true
+        type: string
+      - description: Долгота
+        in: query
+        name: longitude
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WeatherModel'
+      summary: Получить информацию о погоде из OpenWeather
+swagger: "2.0"

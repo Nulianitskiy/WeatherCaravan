@@ -9,6 +9,9 @@ import (
 	"os"
 )
 
+// @title           WeatherCaravan
+// @version         1.0
+// @description     Simple server for work with weather data.
 func main() {
 	router := gin.Default()
 

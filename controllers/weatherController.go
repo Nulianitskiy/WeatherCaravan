@@ -12,6 +12,13 @@ import (
 	"os"
 )
 
+// @Summary Получить информацию о погоде из OpenWeather
+// @Description Получить информацию по координатам
+// @Produce json
+// @Param latitude query string true "Широта"
+// @Param longitude query string true "Долгота"
+// @Success 200 {object} models.WeatherModel
+// @Router /openWeather [get]
 func GetOpenWeatherData(c *gin.Context) {
 	latitude := c.Query("latitude")
 	longitude := c.Query("longitude")
@@ -47,6 +54,13 @@ func GetOpenWeatherData(c *gin.Context) {
 	c.JSON(http.StatusOK, owWeather.ConvertToWeatherModel())
 }
 
+// @Summary Получить информацию о погоде из AccuWeather
+// @Description Получить информацию по координатам
+// @Produce json
+// @Param latitude query string true "Широта"
+// @Param longitude query string true "Долгота"
+// @Success 200 {object} models.WeatherModel
+// @Router /accuWeather [get]
 func GetAccuWeatherData(c *gin.Context) {
 	latitude := c.Query("latitude")
 	longitude := c.Query("longitude")

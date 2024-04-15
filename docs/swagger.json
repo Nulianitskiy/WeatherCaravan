@@ -1,0 +1,105 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Simple server for work with weather data.",
+        "title": "WeatherCaravan",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/accuWeather": {
+            "get": {
+                "description": "Получить информацию по координатам",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить информацию о погоде из AccuWeather",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Широта",
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Долгота",
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.WeatherModel"
+                        }
+                    }
+                }
+            }
+        },
+        "/openWeather": {
+            "get": {
+                "description": "Получить информацию по координатам",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить информацию о погоде из OpenWeather",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Широта",
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Долгота",
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.WeatherModel"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.WeatherModel": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "main": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pressure": {
+                    "type": "number"
+                },
+                "speed": {
+                    "type": "number"
+                },
+                "temp": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}
