@@ -144,3 +144,44 @@ func GetAccuWeatherData(c *gin.Context) {
 
 	c.JSON(http.StatusOK, awModel.ConvertToWeatherModel())
 }
+
+// @Summary Получить информацию о погоде из WeatherApi
+// @Description Получить информацию по координатам
+// @Produce json
+// @Param latitude query string true "Широта"
+// @Param longitude query string true "Долгота"
+// @Success 200 {object} models.WeatherModel
+// @Router /weatherApi [get]
+func GetWeatherApiData(c *gin.Context) {
+	latitude := c.Query("latitude")
+	longitude := c.Query("longitude")
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Ошибка загрузки переменных")
+		return
+	}
+	WAkey := os.Getenv("WAKEY")
+
+	apiUrl := fmt.Sprintf("https://api.weatherapi.com/v1/current.json?q=%s,%s&key=%s", latitude, longitude, WAkey)
+
+	resp, err := http.Get(apiUrl)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Ошибка при чтении тела ответа:", err)
+		return
+	}
+
+	var waWeather models.WeatherApiModel
+
+	if err = json.Unmarshal(body, &waWeather); err != nil {
+		fmt.Println("Ошибка при разборе JSON:", err)
+		return
+	}
+	c.JSON(http.StatusOK, waWeather.ConvertToWeatherModel())
+}

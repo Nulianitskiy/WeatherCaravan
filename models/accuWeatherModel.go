@@ -28,7 +28,7 @@ type awTemp struct {
 	Temp awMetric `json:"Metric"`
 }
 type awMetric struct {
-	Value float32 `json:"Value"`
+	Value float64 `json:"Value"`
 }
 
 func (awm AccuWeatherModel) ConvertToWeatherModel() WeatherModel {

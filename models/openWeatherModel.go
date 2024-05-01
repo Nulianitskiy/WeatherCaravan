@@ -11,8 +11,8 @@ type OpenWeatherModel struct {
 }
 
 type owMain struct {
-	Temp     float32 `json:"temp"`
-	Pressure float32 `json:"pressure"`
+	Temp     float64 `json:"temp"`
+	Pressure float64 `json:"pressure"`
 }
 
 type owSys struct {
@@ -25,7 +25,7 @@ type owWeather struct {
 }
 
 type owWind struct {
-	Speed float32 `json:"speed"`
+	Speed float64 `json:"speed"`
 }
 
 func (owm OpenWeatherModel) ConvertToWeatherModel() WeatherModel {

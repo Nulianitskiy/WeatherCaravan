@@ -14,6 +14,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/openWeather", controllers.GetOpenWeatherData)
 	r.GET("/accuWeather", controllers.GetAccuWeatherData)
+	r.GET("/weatherApi", controllers.GetWeatherApiData)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
