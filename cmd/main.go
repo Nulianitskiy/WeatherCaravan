@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"go.uber.org/ratelimit"
 	"log"
 	"os"
 )
@@ -13,6 +14,8 @@ import (
 // @version         1.0
 // @description     Simple server for work with weather data.
 func main() {
+	limiter := ratelimit.New(10)
+
 	router := gin.Default()
 
 	err := godotenv.Load(".env")
@@ -28,6 +31,12 @@ func main() {
 	router.Static("/pages", "./web/pages")
 	router.Static("/js", "./web/js")
 	router.LoadHTMLGlob("web/pages/*")
+
+	// Rate Limit
+	router.Use(func(c *gin.Context) {
+		limiter.Take()
+		c.Next()
+	})
 
 	routes.SetupRoutes(router)
 
