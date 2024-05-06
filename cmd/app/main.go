@@ -1,12 +1,13 @@
 package main
 
 import (
-	"WeatherCaravan/routes"
+	"WeatherCaravan/internal/routes"
+	"WeatherCaravan/pkg/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.uber.org/ratelimit"
-	"log"
+	"go.uber.org/zap"
 	"os"
 )
 
@@ -14,14 +15,14 @@ import (
 // @version         1.0
 // @description     Simple server for work with weather data.
 func main() {
+
 	limiter := ratelimit.New(10)
 
 	router := gin.Default()
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Println("Ошибка загрузки переменных")
-		return
+		logger.Fatal("Ошибка загрузки переменных")
 	}
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -41,8 +42,12 @@ func main() {
 	routes.SetupRoutes(router)
 
 	addr := fmt.Sprintf(":%s", port)
-	log.Printf("Запуск сервера на порту %s...", port)
+	logger.Info("Запуск сервера",
+		zap.String("port", port),
+	)
 	if err := router.Run(addr); err != nil {
-		log.Fatalf("Ошибка запуска сервера: %v", err)
+		logger.Fatal("Ошибка запуска сервера",
+			zap.Error(err),
+		)
 	}
 }
