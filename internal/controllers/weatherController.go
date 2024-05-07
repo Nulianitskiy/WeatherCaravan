@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"WeatherCaravan/internal/config"
 	"WeatherCaravan/internal/models"
 	"WeatherCaravan/pkg/logger"
 	"encoding/json"
@@ -14,6 +15,35 @@ import (
 	"os"
 )
 
+var apiConfig config.ApiConfig
+
+func init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		logger.Fatal("Ошибка загрузки .env файла")
+	}
+
+	apiConfig.AccuWeatherAPIKey = os.Getenv("AWKEY")
+	if apiConfig.AccuWeatherAPIKey == "" {
+		logger.Error("Переменная AWKEY не установлена")
+	}
+
+	apiConfig.OpenWeatherAPIKey = os.Getenv("OWKEY")
+	if apiConfig.OpenWeatherAPIKey == "" {
+		logger.Error("Переменная OWKEY не установлена")
+	}
+
+	apiConfig.WeatherAPIAPIKey = os.Getenv("WAKEY")
+	if apiConfig.WeatherAPIAPIKey == "" {
+		logger.Error("Переменная WAKEY не установлена")
+	}
+
+	apiConfig.WeatherBitAPIKey = os.Getenv("WBKEY")
+	if apiConfig.WeatherBitAPIKey == "" {
+		logger.Error("Переменная WBKEY не установлена")
+	}
+}
+
 // @Summary Получить информацию о погоде из OpenWeather
 // @Description Получить информацию по координатам
 // @Produce json
@@ -25,22 +55,7 @@ func GetOpenWeatherData(c *gin.Context) {
 	latitude := c.Query("latitude")
 	longitude := c.Query("longitude")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		logger.Error("Ошибка загрузки переменных",
-			zap.Error(err),
-		)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
-	}
-	OWkey := os.Getenv("OWKEY")
-	if OWkey == "" {
-		logger.Error("Переменная OWKEY не установлена")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Переменная OWKEY не установлена"})
-		return
-	}
-
-	apiUrl := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s", latitude, longitude, OWkey)
+	apiUrl := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s", latitude, longitude, apiConfig.OpenWeatherAPIKey)
 
 	resp, err := http.Get(apiUrl)
 	if err != nil {
@@ -85,26 +100,11 @@ func GetAccuWeatherData(c *gin.Context) {
 	latitude := c.Query("latitude")
 	longitude := c.Query("longitude")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		logger.Error("Ошибка при загрузке переменных",
-			zap.Error(err),
-		)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
-	}
-	AWkey := os.Getenv("AWKEY")
-	if AWkey == "" {
-		logger.Error("Переменная AWKEY не установлена")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Переменная AWKEY не установлена"})
-		return
-	}
-
 	// Place
 	apiPlaceURL := "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search"
 
 	queryParams := make(map[string]string)
-	queryParams["apikey"] = AWkey
+	queryParams["apikey"] = apiConfig.AccuWeatherAPIKey
 	queryParams["q"] = fmt.Sprintf("%s,%s", latitude, longitude)
 
 	u, _ := url.Parse(apiPlaceURL)
@@ -146,7 +146,7 @@ func GetAccuWeatherData(c *gin.Context) {
 	apiWeatherURL := fmt.Sprintf("http://dataservice.accuweather.com/currentconditions/v1/%s", awPlace.PlaceKey)
 	fmt.Println(awPlace.PlaceKey)
 	queryParams = make(map[string]string)
-	queryParams["apikey"] = AWkey
+	queryParams["apikey"] = apiConfig.AccuWeatherAPIKey
 
 	u, _ = url.Parse(apiWeatherURL)
 	q = u.Query()
@@ -202,22 +202,7 @@ func GetWeatherApiData(c *gin.Context) {
 	latitude := c.Query("latitude")
 	longitude := c.Query("longitude")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		logger.Error("Ошибка загрузки переменных",
-			zap.Error(err),
-		)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
-	}
-	WAkey := os.Getenv("WAKEY")
-	if WAkey == "" {
-		logger.Error("Переменная WAKEY не установлена")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Переменная WAKEY не установлена"})
-		return
-	}
-
-	apiUrl := fmt.Sprintf("https://api.weatherapi.com/v1/current.json?q=%s,%s&key=%s", latitude, longitude, WAkey)
+	apiUrl := fmt.Sprintf("https://api.weatherapi.com/v1/current.json?q=%s,%s&key=%s", latitude, longitude, apiConfig.WeatherAPIAPIKey)
 
 	resp, err := http.Get(apiUrl)
 	if err != nil {
@@ -248,4 +233,58 @@ func GetWeatherApiData(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, waWeather.ConvertToWeatherModel())
+}
+
+// @Summary Получить информацию о погоде из WeatherBit
+// @Description Получить информацию по координатам
+// @Produce json
+// @Param latitude query string true "Широта"
+// @Param longitude query string true "Долгота"
+// @Success 200 {object} models.WeatherModel
+// @Router /weatherBit [get]
+func GetWeatherBitData(c *gin.Context) {
+	latitude := c.Query("latitude")
+	longitude := c.Query("longitude")
+
+	apiUrl := fmt.Sprintf("https://api.weatherbit.io/v2.0/current?lat=%s&lon=%s&key=%s", latitude, longitude, apiConfig.WeatherBitAPIKey)
+
+	resp, err := http.Get(apiUrl)
+	if err != nil {
+		logger.Error("Ошибка загрузки API",
+			zap.Error(err),
+		)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("Ошибка при чтении тела ответа",
+			zap.Error(err),
+		)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	var wbWeather models.WeatherBitModel
+
+	if err = json.Unmarshal(body, &wbWeather); err != nil {
+		logger.Error("Ошибка при разборе JSON",
+			zap.Error(err),
+		)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	weatherModel, err := wbWeather.ConvertToWeatherModel()
+	if err != nil {
+		logger.Error("Ошибка при конвертации в WeatherModel",
+			zap.Error(err),
+		)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, weatherModel)
 }
